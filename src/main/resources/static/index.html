@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>SmartPlanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use html2pdf for perfect CSS support and Vietnamese characters -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sp-green': '#16a34a',
+                        'sp-green-hover': '#15803d',
+                        'sp-text': '#0f172a',
+                        'sp-text-secondary': '#64748b',
+                        'neutral-primary-soft': '#f5f5f5',
+                        'neutral-tertiary': '#e5e5e5',
+                        'fg-brand': '#2563eb',
+                        'fg-brand-strong': '#1e40af',
+                        'brand-softer': '#eff6ff',
+                        'brand-subtle': '#bfdbfe',
+                        'fg-danger-strong': '#991b1b',
+                        'danger-soft': '#fef2f2',
+                        'danger-subtle': '#fecaca',
+                        'fg-success-strong': '#166534',
+                        'success-soft': '#f0fdf4',
+                        'success-subtle': '#bbf7d0',
+                        'fg-warning': '#9a3412',
+                        'warning-soft': '#fff7ed',
+                        'warning-subtle': '#ffedd5',
+                        'neutral-secondary-medium': '#f1f5f9',
+                        'default-medium': '#e2e8f0',
+                        'heading': '#0f172a',
+                        'body': '#333333'
+                    },
+                    borderRadius: {
+                        'base': '0.375rem'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="app" class="flex h-screen w-full bg-slate-50 text-sp-text font-sans">
+
+        <!-- Sidebar -->
+        <aside id="app-sidebar"
+            class="sp-sidebar w-64 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 z-50 relative shrink-0">
+            <div class="p-5 flex items-center justify-between">
+                <div class="sp-sidebar-logo flex items-center gap-2">
+                    <span class="font-extrabold text-xl tracking-tight text-slate-800">SMART</span>
+                    <span
+                        class="bg-sp-green text-white px-2 py-0.5 rounded-md text-sm font-bold tracking-wider">PLANNER</span>
+                </div>
+            </div>
+            <nav class="sp-sidebar-nav flex-1 px-3 py-4 flex flex-col gap-2 overflow-y-auto">
+                <button data-view="dashboard"
+                    class="sp-sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-all w-full text-left"
+                    type="button">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="sp-sidebar-text">Dashboard</span>
+                </button>
+                <button data-view="timetable"
+                    class="sp-sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-all w-full text-left"
+                    type="button">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                    <span class="sp-sidebar-text">Lịch học</span>
+                </button>
+                <button data-view="courses"
+                    class="sp-sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-all w-full text-left"
+                    type="button">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span class="sp-sidebar-text">Môn học</span>
+                </button>
+                <button data-view="tasks"
+                    class="sp-sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-all w-full text-left"
+                    type="button">
+                    <i data-lucide="list-todo" class="w-5 h-5"></i>
+                    <span class="sp-sidebar-text">Công việc</span>
+                </button>
+                <button data-view="settings"
+                    class="sp-sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-all w-full text-left"
+                    type="button">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span class="sp-sidebar-text">Cài đặt</span>
+                </button>
+            </nav>
+
+            <!-- Account Section -->
+            <div class="mt-auto p-4 border-t border-slate-100 relative">
+                <div id="sidebar-account-pill"
+                    class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
+                    <div id="user-avatar"
+                        class="w-10 h-10 rounded-full bg-sp-green text-white flex items-center justify-center font-bold text-lg shrink-0">
+                        ?
+                    </div>
+                    <div class="flex-1 min-w-0 sp-sidebar-text">
+                        <div id="user-name" class="font-bold text-sm text-slate-800 truncate">Account</div>
+                        <div id="user-email" class="text-xs text-slate-500 truncate">user@example.com</div>
+                    </div>
+                </div>
+
+                <!-- Account Popover -->
+                <div id="account-popover"
+                    class="hidden absolute bottom-full left-4 right-4 mb-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div class="p-4 bg-slate-50/50 border-b border-slate-100">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Thông tin tài khoản
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-500">Email</span>
+                                <span id="profile-email" class="font-medium text-slate-800"></span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-500">Họ tên</span>
+                                <span id="profile-name" class="font-medium text-slate-800"></span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-500">Ngày tạo</span>
+                                <span id="profile-created" class="font-medium text-slate-800"></span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-500">Trạng thái</span>
+                                <span id="profile-status"
+                                    class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-logout"
+                        class="w-full p-4 flex items-center gap-3 text-red-600 font-bold hover:bg-red-50 transition-colors text-sm">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Top Header -->
+            <header
+                class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex justify-between items-center z-40">
+                <div class="flex items-center gap-3">
+                    <button id="btn-toggle-sidebar"
+                        class="text-slate-500 hover:text-slate-800 transition-colors rounded p-1 hover:bg-slate-100 flex items-center justify-center w-8 h-8">
+                        &#9776;
+                    </button>
+                    <div class="text-sm text-slate-500 font-medium hidden md:block">✨ Chào mừng bạn quay lại hệ thống
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Header user info removed as requested. Integrated into sidebar account section. -->
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+                <section id="view-dashboard" class="sp-view sp-view-active">
+                    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
+                            <p class="text-slate-500 text-sm mt-1">Tổng quan tiến độ học tập và nhiệm vụ quan trọng</p>
+                        </div>
+                        <div
+                            class="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-sp-green"></i>
+                            <span id="dashboard-current-date">Hôm nay</span>
+                        </div>
+                    </div>
+
+                    <!-- Kpi Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="relative flex justify-between items-start">
+                                <div>
+                                    <p class="text-slate-500 text-sm font-medium mb-1">Công việc cần làm</p>
+                                    <h3 id="dash-kpi-tasks" class="text-3xl font-bold text-slate-800">--</h3>
+                                </div>
+                                <div class="bg-blue-100 p-2.5 rounded-xl text-blue-600">
+                                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="relative flex justify-between items-start">
+                                <div>
+                                    <p class="text-slate-500 text-sm font-medium mb-1">Môn học đang theo</p>
+                                    <h3 id="dash-kpi-courses" class="text-3xl font-bold text-slate-800">--</h3>
+                                </div>
+                                <div class="bg-purple-100 p-2.5 rounded-xl text-purple-600">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                            <div
+                                class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                            <div class="relative flex justify-between items-start">
+                                <div>
+                                    <p class="text-slate-500 text-sm font-medium mb-1">Giờ học tuần này</p>
+                                    <h3 id="dash-kpi-hours" class="text-3xl font-bold text-slate-800">--</h3>
+                                </div>
+                                <div class="bg-emerald-100 p-2.5 rounded-xl text-emerald-600">
+                                    <i data-lucide="clock" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                        <!-- Left Col: Progress & Recent -->
+                        <div class="lg:col-span-2 flex flex-col gap-8">
+
+                            <!-- Progress Ring Card -->
+                            <div
+                                class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                                <div class="relative w-40 h-40 shrink-0 flex items-center justify-center">
+                                    <!-- SVG Progress Ring -->
+                                    <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8"
+                                            fill="transparent" class="text-slate-100" />
+                                        <circle id="dash-progress-ring" cx="50" cy="50" r="40" stroke="currentColor"
+                                            stroke-width="8" fill="transparent" stroke-dasharray="251.2"
+                                            stroke-dashoffset="251.2" stroke-linecap="round"
+                                            class="text-sp-green transition-all duration-1000 ease-out" />
+                                    </svg>
+                                    <div class="absolute flex flex-col items-center justify-center text-center">
+                                        <span id="dash-progress-text"
+                                            class="text-3xl font-bold text-slate-800">0%</span>
+                                        <span
+                                            class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Hoàn
+                                            thành</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1 text-center md:text-left">
+                                    <h3 class="text-lg font-bold text-slate-800 mb-2">Tiến độ tuần hiện tại</h3>
+                                    <p class="text-slate-500 text-sm mb-4 leading-relaxed">Tiến độ học tập được tính
+                                        bằng số giờ thực tế đã học so với tổng thời gian đăng ký trong tuần. Hãy cố gắng
+                                        duy trì thói quen học mỗi ngày!</p>
+                                    <button
+                                        class="text-sp-green font-semibold text-sm hover:text-sp-green-hover flex items-center justify-center md:justify-start gap-1"
+                                        onclick="appNavigate('timetable')">Xem chi tiết lịch học <i
+                                            data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1">
+                                <div
+                                    class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            data-lucide="activity" class="w-4 h-4 text-blue-500"></i> Hoạt động gần nhất
+                                    </h3>
+                                </div>
+                                <div id="dash-recent-list" class="flex flex-col p-2">
+                                    <!-- Inserted via JS -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Col: Deadlines -->
+                        <div class="flex flex-col gap-6">
+                            <div
+                                class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
+                                <div
+                                    class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i
+                                            data-lucide="alert-circle" class="w-4 h-4 text-rose-500"></i> Deadline sắp
+                                        tới</h3>
+                                    <span class="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full"
+                                        id="dash-deadline-count">0</span>
+                                </div>
+                                <div id="dash-deadlines-list"
+                                    class="flex flex-col p-4 gap-3 overflow-y-auto flex-1 h-[400px]">
+                                    <!-- Inserted via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="view-timetable" class="sp-view">
+                    <div class="sp-page-header flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Lịch học</h1>
+                            <p class="text-slate-500 text-sm mt-1">Theo dõi lịch tuần, trạng thái và hành động nhanh</p>
+                        </div>
+
+                        <!-- NEW VIEW TOGGLE BUTTONS -->
+                        <div class="bg-slate-100 p-1 rounded-lg flex gap-1 border border-slate-200 shadow-inner">
+                            <button id="btn-view-week" onclick="window.setCalView && window.setCalView('week')"
+                                class="px-3 py-1.5 text-sm font-medium rounded-md bg-white text-slate-800 shadow-sm transition-colors">Tuần</button>
+                            <button id="btn-view-day" onclick="window.setCalView && window.setCalView('day')"
+                                class="px-3 py-1.5 text-sm font-medium rounded-md text-slate-500 hover:text-slate-800 transition-colors">Ngày</button>
+                        </div>
+                    </div>
+                    <div class="sp-toolbar">
+                        <button id="btn-week-prev" class="sp-button-secondary">&lt; Tuần trước</button>
+                        <div id="week-label" class="sp-week-label"></div>
+                        <button id="btn-week-next" class="sp-button-secondary">Tuần sau &gt;</button>
+                        <button id="btn-generate-timetable" class="sp-button-primary">Generate timetable</button>
+                        <button id="btn-export-pdf"
+                            class="sp-button-secondary bg-white text-slate-700 border border-slate-200 shadow-sm flex items-center gap-2">
+                            <span class="text-base leading-none font-bold">&#x2913;</span>
+                            Xuất PDF</button>
+
+                    </div>
+                    <div id="timetable-eval" class="sp-eval-banner"></div>
+                    <div id="timetable-legend"
+                        class="sp-legend flex flex-wrap gap-3 text-[11px] font-semibold mb-4 mt-2">
+                        <div
+                            class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-600 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-slate-400"></div>Sắp học
+                        </div>
+                        <div
+                            class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-800 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-amber-500"></div>Đang học
+                        </div>
+                        <div
+                            class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>Đã hoàn thành
+                        </div>
+                        <div
+                            class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-50 border border-purple-200 text-purple-800 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-purple-500"></div>Đã tạm hoãn
+                        </div>
+                        <div
+                            class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-rose-50 border border-rose-200 text-rose-800 shadow-sm">
+                            <div class="w-2 h-2 rounded-full bg-rose-500"></div>Bỏ lỡ
+                        </div>
+                        <span class="ml-auto italic text-slate-400 font-normal mt-1 sm:mt-0">Phiên bỏ lỡ sẽ được tự sắp
+                            lại khi bấm Generate.</span>
+                    </div>
+
+                    <!-- NEW CALENDAR GRID UI (AGENDA STYLE) -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px] h-[calc(100vh-200px)]">
+                        <!-- Calendar Header (Days) -->
+                        <div id="timetable-header-days"
+                            class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <!-- Calendar Body (Scrollable Agenda) -->
+                        <div class="flex-1 overflow-y-auto bg-slate-50/30 p-2 sm:p-4">
+                            <!-- Columns wrapper -->
+                            <div id="timetable-grid" class="grid grid-cols-7 gap-3 sm:gap-4 h-full">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- View Settings & Availability (Feature 5) -->
+                <section id="view-settings" class="sp-view hidden">
+                    <div class="sp-page-header">
+                        <div>
+                            <h1 class="sp-page-title text-2xl font-bold">Cài đặt</h1>
+                            <p class="sp-page-subtitle text-slate-500">Cấu hình thời gian học, mức độ ưu tiên và thời
+                                gian rảnh</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-6">
+                        <!-- Cấu hình chung -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 class="text-lg font-semibold mb-4 text-slate-800">Lộ trình & Giới hạn</h3>
+                            <div class="flex flex-col gap-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+                                        Ngày bắt đầu (Start Date)
+                                        <input type="date" id="pref-start-date"
+                                            class="border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-sp-green w-full text-sm">
+                                    </label>
+                                    <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+                                        Ngày kết thúc (End Date)
+                                        <input type="date" id="pref-end-date"
+                                            class="border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-sp-green w-full text-sm">
+                                    </label>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <label class="flex flex-col gap-1 text-sm font-medium text-slate-700">
+                                        Độ dài ca học (phút)
+                                        <select id="pref-block-minutes"
+                                            class="border border-slate-200 rounded-lg p-2 text-sm w-full">
+                                            <option value="30">30 phút</option>
+                                            <option value="60" selected>60 phút</option>
+                                            <option value="90">90 phút</option>
+                                            <option value="120">120 phút</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div>
+                                    <strong class="text-sm text-slate-700 mb-2 block">Ngày nghỉ (không học):</strong>
+                                    <div class="grid grid-cols-4 gap-2 text-sm text-slate-600">
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="MON"> Thứ 2</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="TUE"> Thứ 3</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="WED"> Thứ 4</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="THU"> Thứ 5</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="FRI"> Thứ 6</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="SAT"> Thứ 7</label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" name="pref-days"
+                                                value="SUN"> CN</label>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 justify-end mt-4">
+                                    <button id="btn-settings-reset"
+                                        class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition">Mặc
+                                        định</button>
+                                    <button id="btn-settings-save"
+                                        class="px-4 py-2 rounded-lg bg-sp-green text-white font-medium hover:bg-sp-green-hover transition shadow-sm">Lưu
+                                        cấu hình</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Giờ rảnh -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-slate-800">Khung giờ rảnh (Availability)</h3>
+                                <button id="btn-avail-add-new"
+                                    class="text-sp-green bg-green-50 px-3 py-1.5 rounded-lg font-medium text-sm flex items-center gap-1 hover:bg-green-100 transition"><i
+                                        data-lucide="plus" class="w-4 h-4"></i> Thêm mới</button>
+                            </div>
+
+                            <div id="avail-form-container"
+                                class="bg-slate-50 border border-slate-200 p-4 rounded-xl mb-4 hidden">
+                                <form id="avail-form-modal" class="flex flex-col gap-3">
+                                    <input type="hidden" id="avail-id-modal">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label class="flex flex-col gap-1 text-sm font-medium text-slate-700"> Thứ
+                                            <select id="avail-day-modal" required
+                                                class="border border-slate-200 rounded-lg p-2 text-sm">
+                                                <option value="1">Thứ 2</option>
+                                                <option value="2">Thứ 3</option>
+                                                <option value="3">Thứ 4</option>
+                                                <option value="4">Thứ 5</option>
+                                                <option value="5">Thứ 6</option>
+                                                <option value="6">Thứ 7</option>
+                                                <option value="7">Chủ nhật</option>
+                                            </select>
+                                        </label>
+                                        <label class="flex flex-col gap-1 text-sm font-medium text-slate-700"> Trạng
+                                            thái
+                                            <select id="avail-active-modal"
+                                                class="border border-slate-200 rounded-lg p-2 text-sm">
+                                                <option value="true">Đang dùng</option>
+                                                <option value="false">Tạm tắt</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label class="flex flex-col gap-1 text-sm font-medium text-slate-700"> Bắt đầu
+                                            <input type="time" id="avail-start-modal" required
+                                                class="border border-slate-200 rounded-lg p-2 text-sm">
+                                        </label>
+                                        <label class="flex flex-col gap-1 text-sm font-medium text-slate-700"> Kết thúc
+                                            <input type="time" id="avail-end-modal" required
+                                                class="border border-slate-200 rounded-lg p-2 text-sm">
+                                        </label>
+                                    </div>
+                                    <div class="flex gap-2 justify-end mt-2">
+                                        <button type="button" id="btn-avail-cancel-modal"
+                                            class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-300">Hủy</button>
+                                        <button type="submit"
+                                            class="px-3 py-1.5 rounded-lg bg-sp-green text-white text-sm font-medium hover:bg-sp-green-hover">Lưu
+                                            Slot</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div id="avail-list-modal"
+                                class="flex flex-col gap-2 overflow-y-auto flex-1 max-h-[300px] pr-2">
+                                <!-- slots injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </section>
+
+                <!-- Sticky bottom prompt if no availabilities -->
+                <div id="availability-prompt"
+                    class="fixed bottom-0 left-0 md:left-64 right-0 p-4 bg-emerald-900 border-t border-emerald-800 text-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex items-center justify-between z-50 transform translate-y-full transition-transform duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-emerald-800 p-2 rounded-full"><i data-lucide="clock"
+                                class="w-5 h-5 text-emerald-300"></i></div>
+                        <div>
+                            <h4 class="font-bold text-sm">Chưa cài đặt thời gian rảnh</h4>
+                            <p class="text-xs text-emerald-200">Hệ thống cần biết giờ rảnh của bạn để xếp lịch học
+                                chính xác nhất.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <button id="btn-prompt-close"
+                            class="flex items-center justify-center p-2 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg transition-colors font-medium text-sm gap-2"
+                            onclick="appNavigate('settings')">
+                            Cài đặt ngay
+                        </button>
+                        <button id="btn-prompt-dismiss" class="text-emerald-400 hover:text-white p-2">✕</button>
+                    </div>
+                </div>
+
+                <!-- Focus Timer View (Hidden by default) -->
+                <div id="view-session-timer"
+                    class="sp-session-timer-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 items-center justify-center p-4 hidden">
+                    <div
+                        class="bg-white rounded-[2rem] shadow-2xl max-w-lg w-full flex flex-col items-center p-8 md:p-12 relative overflow-hidden">
+
+                        <!-- Header Detail -->
+                        <div class="w-full flex flex-col items-center mb-10 relative z-10">
+                            <div
+                                class="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-xs font-bold tracking-wider uppercase rounded-full mb-3 shadow-sm border border-emerald-100 inline-flex items-center gap-1.5">
+                                <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Môn học
+                            </div>
+                            <h2 id="timer-course-name"
+                                class="text-2xl font-bold text-slate-800 text-center w-full px-2 truncate leading-tight">
+                                Course Name</h2>
+                            <h3 id="timer-task-title"
+                                class="text-sm font-medium text-slate-500 text-center mt-2 w-full line-clamp-2 px-2">
+                                Task Title</h3>
+                        </div>
+
+                        <!-- Circular Countdown Display -->
+                        <div
+                            class="relative w-64 h-64 mb-10 flex items-center justify-center rounded-full bg-slate-50 border-[12px] border-slate-100 shadow-inner group">
+                            <!-- Glowing background ring -->
+                            <div
+                                class="absolute inset-[-12px] rounded-full ring-4 ring-emerald-500/20 blur-md transition-all">
+                            </div>
+
+                            <!-- Outer emerald track imitation -->
+                            <div
+                                class="absolute inset-[-12px] rounded-full border-[12px] border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] border-t-emerald-300 border-r-emerald-400">
+                            </div>
+
+                            <!-- Timer Digits -->
+                            <div class="flex flex-col items-center justify-center z-10">
+                                <div id="timer-countdown"
+                                    class="text-5xl font-black tracking-tight text-slate-800 font-mono">00:00:00</div>
+                                <p id="timer-hint"
+                                    class="text-xs text-emerald-600 font-semibold uppercase tracking-widest mt-2 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                                    Hãy tập trung!</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Controls -->
+                        <div class="flex items-center gap-4 w-full justify-center relative z-10">
+                            <button id="btn-timer-skip"
+                                class="py-3.5 px-6 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors w-1/3">
+                                Dừng lại
+                            </button>
+                            <button id="btn-timer-complete"
+                                class="py-3.5 px-6 rounded-2xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 shadow-[0_8px_20px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-1 w-2/3 flex justify-center items-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> Hoàn thành
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <section id="view-courses" class="sp-view">
+                    <div class="sp-page-header">
+                        <div>
+                            <h1 class="sp-page-title">Môn học</h1>
+                            <p class="sp-page-subtitle">Quản lý môn học, mức độ ưu tiên và tổng giờ</p>
+                        </div>
+                    </div>
+                    <div class="sp-toolbar">
+                        <h2 class="sp-section-title">Danh sách môn</h2>
+                        <button id="btn-course-new" class="sp-button-primary"
+                            onclick="window.openCourseForm && window.openCourseForm(null)">+ Môn mới</button>
+                    </div>
+                    <div id="course-form-card" class="sp-card sp-form-card">
+                        <h3 id="course-form-title" class="sp-section-title">Thêm môn học</h3>
+                        <form id="course-form" class="sp-form-inline"
+                            onsubmit="if(window.handleCourseSubmit){window.handleCourseSubmit(event)}else{event.preventDefault()}">
+                            <input type="hidden" id="course-id">
+                            <label>
+                                Tên môn
+                                <input type="text" id="course-name" required>
+                            </label>
+                            <label>
+                                Độ ưu tiên
+                                <select id="course-priority">
+                                    <option value="HIGH">HIGH</option>
+                                    <option value="MEDIUM" selected>MEDIUM</option>
+                                    <option value="LOW">LOW</option>
+                                </select>
+                            </label>
+                            <label id="course-status-wrapper" style="display:none">
+                                Trạng thái
+                                <select id="course-status">
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="ARCHIVED">ARCHIVED</option>
+                                </select>
+                            </label>
+                            <div class="sp-form-actions">
+                                <button type="submit" class="sp-button-primary">Lưu</button>
+                                <button type="button" id="course-form-cancel" class="sp-button-secondary"
+                                    onclick="window.toggleCourseForm && window.toggleCourseForm(false)">Hủy</button>
+                            </div>
+                        </form>
+                        <div id="course-form-error" class="sp-error-text"></div>
+                    </div>
+                    <div id="courses-list" class="sp-list"></div>
+                    <div id="courses-empty" class="sp-empty-state">
+                        <div class="sp-empty-icon">📚</div>
+                        <div class="sp-empty-title">Chưa có môn học</div>
+                        <div class="sp-empty-subtitle">Thêm môn để bắt đầu lập kế hoạch học tập.</div>
+                        <button class="sp-button sp-button-primary" data-empty-action="courses">Thêm môn học</button>
+                    </div>
+
+                </section>
+
+                <section id="view-tasks" class="sp-view">
+                    <div class="sp-page-header">
+                        <div>
+                            <h1 class="sp-page-title">Công việc</h1>
+                            <p class="sp-page-subtitle">Theo dõi deadline, trạng thái và tiến độ hoàn thành</p>
+                        </div>
+                    </div>
+                    <div
+                        class="sp-toolbar flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
+                        <div
+                            class="flex gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-sm overflow-x-auto max-w-full">
+                            <button
+                                class="sp-task-tab text-sm px-4 py-1.5 rounded-lg text-white bg-emerald-600 font-semibold shadow-sm transition-all"
+                                data-status="ALL"
+                                onclick="window.setTaskFilter && window.setTaskFilter(this, 'ALL')">Tất cả</button>
+                            <button
+                                class="sp-task-tab text-sm px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 font-medium transition-all"
+                                data-status="IN_PROGRESS"
+                                onclick="window.setTaskFilter && window.setTaskFilter(this, 'IN_PROGRESS')">Đang
+                                học</button>
+                            <button
+                                class="sp-task-tab text-sm px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 font-medium transition-all"
+                                data-status="DONE"
+                                onclick="window.setTaskFilter && window.setTaskFilter(this, 'DONE')">Đã học</button>
+                            <button
+                                class="sp-task-tab text-sm px-4 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 font-medium transition-all"
+                                data-status="INACTIVE"
+                                onclick="window.setTaskFilter && window.setTaskFilter(this, 'INACTIVE')">Không hoạt
+                                động</button>
+                        </div> <!-- end tabs -->
+                        <button id="btn-task-new"
+                            class="sp-button-primary ml-auto shadow-sm px-4 py-2 bg-sp-green hover:bg-sp-green-hover text-white rounded-lg font-medium transition flex items-center gap-1"
+                            onclick="window.openTaskForm && window.openTaskForm(null)">+ Thêm việc</button>
+                    </div>
+
+                    <div id="task-form-card" class="sp-card sp-form-card">
+                        <h3 id="task-form-title" class="sp-section-title">Thêm task</h3>
+                        <form id="task-form" class="sp-form-inline"
+                            onsubmit="if(window.handleTaskSubmit){window.handleTaskSubmit(event)}else{event.preventDefault()}">
+                            <input type="hidden" id="task-id">
+                            <label>
+                                Môn (courseId)
+                                <select id="task-course-id" required>
+                                    <option value="">(Chọn môn)</option>
+                                </select>
+                            </label>
+                            <label>
+                                Tiêu đề
+                                <input type="text" id="task-title" required>
+                            </label>
+                            <label>
+                                Loại
+                                <select id="task-type">
+                                    <option value="ASSIGNMENT">ASSIGNMENT</option>
+                                    <option value="QUIZ">QUIZ</option>
+                                    <option value="MIDTERM">MIDTERM</option>
+                                    <option value="FINAL">FINAL</option>
+                                    <option value="READING">READING</option>
+                                    <option value="PROJECT">PROJECT</option>
+                                    <option value="OTHER" selected>OTHER</option>
+                                </select>
+                            </label>
+                            <label>
+                                Ưu tiên
+                                <select id="task-priority">
+                                    <option value="HIGH">HIGH</option>
+                                    <option value="MEDIUM" selected>MEDIUM</option>
+                                    <option value="LOW">LOW</option>
+                                </select>
+                            </label>
+                            <label>
+                                Deadline
+                                <input type="date" id="task-deadline" required>
+                            </label>
+                            <label>
+                                Giờ ước lượng
+                                <input type="number" step="0.25" min="0" id="task-estimated-hours" required>
+                            </label>
+                            <label id="task-remaining-wrapper" style="display:none">
+                                Giờ còn lại
+                                <input type="number" step="0.25" min="0" id="task-remaining-hours">
+                            </label>
+                            <label id="task-status-wrapper" style="display:none">
+                                Trạng thái
+                                <select id="task-status">
+                                    <option value="OPEN">OPEN</option>
+                                    <option value="DONE">DONE</option>
+                                    <option value="CANCELED">CANCELED</option>
+                                </select>
+                            </label>
+                            <label class="sp-form-full">
+                                Mô tả
+                                <textarea id="task-description" rows="2"></textarea>
+                            </label>
+                            <div class="sp-form-actions">
+                                <button type="submit" class="sp-button-primary">Lưu</button>
+                                <button type="button" id="task-form-cancel" class="sp-button-secondary"
+                                    onclick="window.toggleTaskForm && window.toggleTaskForm(false)">Hủy</button>
+                            </div>
+                        </form>
+                        <div id="task-form-error" class="sp-error-text"></div>
+                    </div>
+                    <div id="tasks-list" class="sp-list"></div>
+                    <div id="tasks-empty" class="sp-empty-state">
+                        <div class="sp-empty-icon">✅</div>
+                        <div class="sp-empty-title">Chưa có công việc</div>
+                        <div class="sp-empty-subtitle">Thêm task để lịch học tự động được tạo.</div>
+                        <button class="sp-button sp-button-primary" data-empty-action="tasks">Tạo công việc</button>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="toast-container"></div>
+    <div id="modal-overlay" class="sp-modal-overlay">
+        <div class="modal-box">
+            <div id="modal-title" class="modal-title"></div>
+            <div id="modal-message"></div>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="sp-button-secondary">Hủy</button>
+                <button id="modal-confirm" class="sp-button-primary">OK</button>
+            </div>
+        </div>
+    </div>
+    <div id="reflection-overlay"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full flex flex-col p-6 relative">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800">Ghi chú sau buổi học</h2>
+                <button id="reflection-cancel-top"
+                    class="text-slate-400 hover:text-slate-600 rounded-full p-2 hover:bg-slate-100 transition-colors"
+                    onclick="document.getElementById('reflection-cancel')?.click()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="reflection-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <label class="flex flex-col gap-2">
+                        <span class="text-sm font-medium text-slate-700">Độ khó</span>
+                        <select id="reflection-difficulty"
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 text-slate-700 transition-all cursor-pointer appearance-none">
+                            <option value="">(Bỏ qua)</option>
+                            <option value="EASY">EASY (Dễ)</option>
+                            <option value="MEDIUM">MEDIUM (Vừa)</option>
+                            <option value="HARD">HARD (Khó)</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-2 md:col-span-2">
+                        <span class="text-sm font-medium text-slate-700">Bạn đã học được gì?</span>
+                        <textarea id="reflection-note" rows="4"
+                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 transition-all resize-none text-slate-700"
+                            placeholder="Ví dụ: Hôm nay mình hiểu X, còn vướng Y. Buổi sau làm bài Z."></textarea>
+                    </label>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button id="reflection-cancel"
+                        class="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm">Hủy</button>
+                    <button id="reflection-save"
+                        class="px-6 py-2.5 rounded-xl font-medium text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors text-sm">Lưu
+                        & Đánh giá AI</button>
+                </div>
+            </div>
+
+            <div id="reflection-loading" class="hidden flex-col items-center justify-center py-10 gap-4">
+                <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <div class="text-slate-500 font-medium animate-pulse">AI đang phân tích note...</div>
+            </div>
+
+            <div id="reflection-result" class="hidden flex-col gap-5">
+                <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                    <div class="relative z-10 space-y-4">
+                        <div>
+                            <h4 class="text-xs font-bold text-indigo-400 tracking-wider uppercase mb-1">Điểm chất lượng
+                            </h4>
+                            <div class="text-3xl font-extrabold text-indigo-600 font-mono" id="reflection-quality">--
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">Tóm tắt (AI)
+                                </h4>
+                                <p class="text-sm text-slate-700 bg-white/60 rounded-xl p-3 border border-indigo-50 leading-relaxed"
+                                    id="reflection-summary">--</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">Hành động
+                                    tiếp theo</h4>
+                                <p class="text-sm text-slate-700 bg-white/60 rounded-xl p-3 border border-indigo-50 leading-relaxed"
+                                    id="reflection-next">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-1">Note của bạn</h4>
+                        <p class="text-sm text-slate-600 italic bg-slate-50 rounded-xl p-4 border border-slate-100"
+                            id="reflection-note-view">--</p>
+                    </div>
+                    <div id="reflection-revision"
+                        class="text-sm text-slate-600 bg-amber-50 rounded-xl p-4 border border-amber-100">--</div>
+                    <div id="reflection-error" class="text-sm text-rose-600 font-medium empty:hidden"></div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button id="reflection-close"
+                        class="px-8 py-2.5 rounded-xl font-medium text-white bg-slate-800 hover:bg-slate-900 shadow-sm transition-colors text-sm">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hidden template for Premium PDF Export -->
+    <div id="pdf-export-template" class="hidden">
+        <div class="p-10 bg-white font-sans text-slate-800"
+            style="width: 1080px; min-height: 760px; box-sizing: border-box;">
+            <!-- Header -->
+            <div class="flex justify-between items-end border-b-2 border-emerald-500 pb-4 mb-6">
+                <div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter italic">SMART<span
+                            class="text-emerald-500">PLANNER</span></h1>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Smart Academic
+                        Schedule & Roadmap</p>
+                </div>
+                <div class="text-right">
+                    <p id="pdf-week-label" class="text-xl font-extrabold text-slate-800">Tuần: --</p>
+                    <p class="text-slate-400 text-[10px] italic">Xuất bản: <span id="pdf-export-date">--</span></p>
+                </div>
+            </div>
+
+            <!-- Calendar Grid Header (Days) -->
+            <div
+                class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200 rounded-t-xl overflow-hidden shadow-sm">
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 2</div>
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 3</div>
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 4</div>
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 5</div>
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 6</div>
+                <div
+                    class="bg-slate-800 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Thứ 7</div>
+                <div
+                    class="bg-emerald-600 text-white p-3 text-center text-xs font-black uppercase italic tracking-widest">
+                    Chủ Nhật</div>
+            </div>
+
+            <!-- Calendar Grid Content -->
+            <div id="pdf-calendar-grid"
+                class="grid grid-cols-7 gap-px bg-slate-200 border-x border-b border-slate-200 rounded-b-xl overflow-hidden min-h-[500px]">
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-0"></div>
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-1"></div>
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-2"></div>
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-3"></div>
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-4"></div>
+                <div class="bg-white p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-5"></div>
+                <div class="bg-slate-50 p-2 flex flex-col gap-2 min-h-[500px]" id="pdf-col-6"></div>
+            </div>
+
+            <!-- Legend & Footer -->
+            <div class="mt-8 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                <div class="flex gap-4">
+                    <span class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-sm bg-blue-500"></div> Đang chờ
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></div> Hoàn thành
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-sm bg-rose-400"></div> Bỏ lỡ
+                    </span>
+                </div>
+                <div>Generated by SmartPlanner AI • High Productivity Roadmap</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lucide Icons for clean SaaS visuals -->
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+    <script type="module" src="/js/main.js"></script>
+</body>
+
+</html>

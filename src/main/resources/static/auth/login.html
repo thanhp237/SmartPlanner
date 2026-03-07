@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartPlanner - Đăng nhập</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'figtree', sans-serif;
+        }
+
+        .tab-btn {
+            padding-bottom: 8px;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: #1f2937;
+        }
+
+        .tab-btn.active {
+            color: #16a34a;
+            border-bottom-color: #16a34a;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="font-sans text-gray-900 antialiased">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-slate-50">
+            <div>
+                <a href="/">
+                    <h2 class="font-bold text-3xl tracking-tight">SMART <span
+                            class="bg-[#16a34a] text-white px-2 rounded-md tracking-normal">PLANNER</span></h2>
+                </a>
+            </div>
+
+            <div
+                class="w-full sm:max-w-md mt-8 px-8 py-6 bg-white shadow-xl overflow-hidden sm:rounded-2xl border border-gray-100">
+                <!-- Tabs -->
+                <div class="flex gap-6 mb-6 border-b border-gray-200">
+                    <button id="tab-login" class="tab-btn active" type="button">Đăng nhập</button>
+                    <button id="tab-register" class="tab-btn" type="button">Đăng ký</button>
+                </div>
+
+                <div id="auth-error" class="text-sm font-medium text-red-600 text-center mb-4 hidden"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="login-form">
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 mb-1" for="email">Email</label>
+                        <div class="relative">
+                            <i class='bx bx-envelope absolute left-3 top-3 text-gray-400 text-lg'></i>
+                            <input type='email' name='email' placeholder='name@example.com' required
+                                class="w-full rounded-xl py-2.5 pl-10 pr-4 border border-gray-300 text-sm focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] outline-none transition-shadow" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 mb-1" for="password">Mật khẩu</label>
+                        <div class="relative">
+                            <i class='bx bx-lock-alt absolute left-3 top-3 text-gray-400 text-lg'></i>
+                            <input id="login-password" type="password" name="password" placeholder="••••••••" required
+                                autocomplete="current-password"
+                                class="w-full rounded-xl py-2.5 pl-10 pr-10 border border-gray-300 text-sm focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] outline-none transition-shadow">
+                            <button type="button"
+                                class="togglePassword absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                data-target="login-password">
+                                <i class='bx bx-hide text-xl'></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-4 mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember"
+                                class="rounded border-gray-300 text-[#16a34a] shadow-sm focus:ring-[#16a34a]">
+                            <span class="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
+                        </label>
+                        <a class="text-sm text-[#16a34a] hover:text-[#15803d] font-medium hover:underline" href="#">Quên
+                            mật khẩu?</a>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center items-center px-4 py-3 bg-[#16a34a] text-white rounded-xl font-semibold text-sm hover:bg-[#15803d] focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:ring-offset-2 transition-all shadow-md">
+                        Đăng nhập
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="register-form" class="hidden">
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 mb-1" for="fullName">Họ và tên</label>
+                        <div class="relative">
+                            <i class='bx bx-user absolute left-3 top-3 text-gray-400 text-lg'></i>
+                            <input type='text' name='fullName' placeholder='Nguyễn Văn A' required autocomplete="name"
+                                class="w-full rounded-xl py-2.5 pl-10 pr-4 border border-gray-300 text-sm focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] outline-none transition-shadow" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 mb-1" for="email">Email</label>
+                        <div class="relative">
+                            <i class='bx bx-envelope absolute left-3 top-3 text-gray-400 text-lg'></i>
+                            <input type='email' name='email' placeholder='name@example.com' required
+                                autocomplete="email"
+                                class="w-full rounded-xl py-2.5 pl-10 pr-4 border border-gray-300 text-sm focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] outline-none transition-shadow" />
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block font-medium text-sm text-gray-700 mb-1" for="password">Mật khẩu</label>
+                        <div class="relative">
+                            <i class='bx bx-lock-alt absolute left-3 top-3 text-gray-400 text-lg'></i>
+                            <input id="register-password" type="password" name="password"
+                                placeholder="Tạo mật khẩu (Ít nhất 6 ký tự)" required autocomplete="new-password"
+                                class="w-full rounded-xl py-2.5 pl-10 pr-10 border border-gray-300 text-sm focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a] outline-none transition-shadow">
+                            <button type="button"
+                                class="togglePassword absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                data-target="register-password">
+                                <i class='bx bx-hide text-xl'></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center items-center px-4 py-3 bg-[#16a34a] text-white rounded-xl font-semibold text-sm hover:bg-[#15803d] focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:ring-offset-2 transition-all shadow-md">
+                        Tạo tài khoản
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-8 text-sm text-gray-500">
+                &copy; 2024 SmartPlanner. Quản lý việc học của bạn.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const formLogin = document.getElementById('login-form');
+        const formRegister = document.getElementById('register-form');
+        const errorEl = document.getElementById('auth-error');
+
+        function switchTab(tab) {
+            errorEl.textContent = '';
+            errorEl.classList.add('hidden');
+            if (tab === 'login') {
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+            }
+        }
+
+        tabLogin.addEventListener('click', () => switchTab('login'));
+        tabRegister.addEventListener('click', () => switchTab('register'));
+
+        // Password Visibility Toggle Logic
+        document.querySelectorAll('.togglePassword').forEach(button => {
+            button.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bx-hide');
+                    icon.classList.add('bx-show');
+                    icon.classList.add('text-[#16a34a]');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bx-show');
+                    icon.classList.remove('text-[#16a34a]');
+                    icon.classList.add('bx-hide');
+                }
+            });
+        });
+
+        // API Handling Logic
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+        }
+
+        async function handleAuth(form, url) {
+            errorEl.classList.add('hidden');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const origText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="spinner"></div> Đang xử lý...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            for (let k in payload) payload[k] = payload[k].trim();
+
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    credentials: "include"
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    try {
+                        const json = JSON.parse(text);
+                        if (json.errors) showError(Object.values(json.errors).join(", ") || json.message);
+                        else showError(json.message || "Thao tác thất bại");
+                    } catch {
+                        showError(text || "Thao tác thất bại");
+                    }
+                    return;
+                }
+                window.location.href = "/";
+            } catch (err) {
+                console.error("Login Error:", err);
+                showError("Không thể kết nối đến máy chủ");
+            } finally {
+                submitBtn.innerHTML = origText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        formLogin.addEventListener("submit", e => { e.preventDefault(); handleAuth(formLogin, "/api/auth/login"); });
+        formRegister.addEventListener("submit", e => { e.preventDefault(); handleAuth(formRegister, "/api/auth/register"); });
+    </script>
+</body>
+
+</html>
